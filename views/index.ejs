@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANCE TRACKER</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>FINANCE TRACKER</h1>
+
+    <main>
+        <header>
+            <div>
+                <h5>TOTAL BALANCE</h5>
+                <span id="balance"> Php 0.00</span>
+            </div>
+
+            <div>
+                <h5>Income</h5>
+                <span id="income">$0.00</span>
+            </div>
+
+            <div>
+                <h5>Expense</h5>
+                <span id="expense">$0.00</span>
+            </div>
+        </header>
+
+        <section>
+            <h3>Transactions</h3>
+            <ul id="transactionList"></ul>
+            <div id="status"></div>
+        </section>
+
+        <section>
+            <h3>Add Transactions</h3>
+            <form id="transactionForm" action="/add" method="POST">
+                <div>
+                    <label for="type">
+                        <input type="checkbox" name="type" id="type" />
+                        <div class="option">
+                          <span>Expense</span>
+                          <span>Income</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div>
+                    <label for="name">Name</label>
+                    <input type="text" name="name" placeholder="Name" required>
+                </div>
+
+                <div>
+                    <label for="amount">Amount</label>
+                    <input type="number" name="amount" value="0" min="0.01" step="0.01" required />
+                </div>
+
+                <div>
+                    <label for="date">Date</label>
+                    <input type="date" name="date" required />
+                </div>
+
+                <button type="submit">Add</button>
+            </form>
+        </section>
+    </main>
+
+    
+            <h2>Financial History</h2>
+        <table class="content-header" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                 <% transactions.forEach(transaction => { %>
+            <tr>
+                <td><%= transaction.id %></td>
+                <td><%= transaction.type %></td>
+                <td><%= transaction.name %></td>
+                <td><%= transaction.amount %></td>
+                <td><%= transaction.date %></td>
+                <!-- <td>
+                    <form action="/update/<%= transaction.id %>" method="POST" style="display:inline;">
+                        <input type="radio" name="type" value="income" <%= transaction.type === 'income' ? 'checked' : '' %> required> Income
+                        <input type="radio" name="type" value="expense" <%= transaction.type === 'expense' ? 'checked' : '' %> required> Expense
+                        <input type="text" name="name" value="<%= transaction.name %>" required>
+                        <input type="number" name="amount" value="<%= transaction.amount %>" required>
+                        <input type="date" name="date" value="<%= transaction.date %>" required>
+                        <button type="submit">Update</button>
+                    </form>
+                    <form action="/delete/<%= transaction.id %>" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <% }); %> -->
+                <tr>
+                    <td contenteditable="true">1</td>
+                    <td contenteditable="true">Income</td>
+                    <td contenteditable="true">Salary</td>
+                    <td contenteditable="true">$2500</td>
+                    <td contenteditable="true">2024-12-01</td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">2</td>
+                    <td contenteditable="true">Expense</td>
+                    <td contenteditable="true">Rent</td>
+                    <td contenteditable="true">$1200</td>
+                    <td contenteditable="true">2024-12-02</td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">3</td>
+                    <td contenteditable="true">Expense</td>
+                    <td contenteditable="true">Groceries</td>
+                    <td contenteditable="true">$150</td>
+                    <td contenteditable="true">2024-12-03</td>
+                </tr>
+            </tbody>
+        </table>
+    <script src="script.js"></script>
+</body>
+</html>
