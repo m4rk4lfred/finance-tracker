@@ -66,64 +66,79 @@
         </section>
     </main>
 
-    
-            <h2>Financial History</h2>
-        <table class="content-header" border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                 <% transactions.forEach(transaction => { %>
+    <h2>Financial History</h2>
+    <table class="content-header" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% function dateFormat(dateString) { 
+                const date = new Date(dateString); 
+                const month = String(date.getMonth() + 1).padStart(2, '0'); 
+                const day = String(date.getDate()).padStart(2, '0'); 
+                const year = date.getFullYear(); 
+                return `${month}/${day}/${year}`; 
+            } %>
+            <% transactions.forEach(transaction => { %>
             <tr>
                 <td><%= transaction.id %></td>
                 <td><%= transaction.type %></td>
                 <td><%= transaction.name %></td>
                 <td><%= transaction.amount %></td>
-                <td><%= transaction.date %></td>
-                <!-- <td>
-                    <form action="/update/<%= transaction.id %>" method="POST" style="display:inline;">
-                        <input type="radio" name="type" value="income" <%= transaction.type === 'income' ? 'checked' : '' %> required> Income
-                        <input type="radio" name="type" value="expense" <%= transaction.type === 'expense' ? 'checked' : '' %> required> Expense
-                        <input type="text" name="name" value="<%= transaction.name %>" required>
-                        <input type="number" name="amount" value="<%= transaction.amount %>" required>
-                        <input type="date" name="date" value="<%= transaction.date %>" required>
-                        <button type="submit">Update</button>
-                    </form>
-                    <form action="/delete/<%= transaction.id %>" method="POST" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
+                <td><%= dateFormat(transaction.date) %></td>
+                <td>
+                    <button class="btn btn-view" onclick="viewTransaction(<%= JSON.stringify(transaction) %>)">View</button>
+                    <button class="btn btn-update" onclick="showUpdateModal(<%= JSON.stringify(transaction) %>)">Update</button>
+                    <button class="btn btn-delete" onclick="deleteTransaction(<%= transaction.id %>)">Delete</button>
                 </td>
             </tr>
-            <% }); %> -->
-                <tr>
-                    <td contenteditable="true">1</td>
-                    <td contenteditable="true">Income</td>
-                    <td contenteditable="true">Salary</td>
-                    <td contenteditable="true">$2500</td>
-                    <td contenteditable="true">2024-12-01</td>
-                </tr>
-                <tr>
-                    <td contenteditable="true">2</td>
-                    <td contenteditable="true">Expense</td>
-                    <td contenteditable="true">Rent</td>
-                    <td contenteditable="true">$1200</td>
-                    <td contenteditable="true">2024-12-02</td>
-                </tr>
-                <tr>
-                    <td contenteditable="true">3</td>
-                    <td contenteditable="true">Expense</td>
-                    <td contenteditable="true">Groceries</td>
-                    <td contenteditable="true">$150</td>
-                    <td contenteditable="true">2024-12-03</td>
-                </tr>
-            </tbody>
-        </table>
-    <script src="script.js"></script>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <!-- View Modal Structure -->
+  <!-- View Modal Structure -->
+  <div id="viewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('viewModal')">&times;</span>
+            <h2 id="viewHeader">View Record Information</h2>
+        </div>
+        <p id="viewDetails"></p>
+    </div>
+</div>
+
+<div id="updateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal('updateModal')">&times;</span>
+            <h2 id="updateHeader">Update Transaction</h2>
+        </div>
+        <form id="updateForm" onsubmit="updateTransaction(event)">
+            <input type="hidden" name="id" id="updateId">
+            <div>
+                <label for="updateName">Name</label>
+                <input type="text" name="name" id="updateName" required>
+            </div>
+            <div>
+                <label for="updateAmount">Amount</label>
+                <input type="number" name="amount" id="updateAmount" required>
+            </div>
+            <div>
+                <label for="updateDate">Date</label>
+                <input type="date" name="date" id="updateDate" required>
+            </div>
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+    <script src="/script.js"></script>
 </body>
 </html>

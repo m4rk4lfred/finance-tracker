@@ -15,7 +15,7 @@ app.use(express.json());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', // Replace with your MySQL username
-    password: 'password', // Replace with your MySQL password
+    password: '123', // Replace with your MySQL password
     database: 'DATABASE_PROJECT',
 });
 
@@ -32,16 +32,15 @@ app.set('view engine', 'ejs');
 
 // Routes
 app.get('/', (req, res) => {
-    const query = 'SELECT * FROM transactions';
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching records:', err.message);
-            res.sendStatus(500);
-        } else {
-            console.log(results);
-            res.render('index', { transactions: results });
-        }
-    });
+  const query = 'SELECT * FROM transactions';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching records:', err.message);
+          res.sendStatus(500);
+      } else {
+          res.render('index', { transactions: results });
+      }
+  });
 });
 
 app.get('/api/transactions', (req, res) => {
@@ -101,9 +100,6 @@ app.delete('/api/transactions/:id', (req, res) => {
     });
   });
 
-
-  
-  
 
 // Start server
 const PORT = 3000;
