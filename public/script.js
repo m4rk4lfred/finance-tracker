@@ -1,7 +1,8 @@
 const formatter = new Intl.NumberFormat("en-PH", {
   style: "currency",
   currency: "PHP",
-  signDisplay: "always",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
 const list = document.getElementById("transactionList");
@@ -18,62 +19,53 @@ function updateTotal() {
   fetch('/api/transactions')
     .then(response => response.json())
     .then(transactions => {
-      const incomeTotal = transactions
-        .filter((transact) => transact.type === "income")
-        .reduce((total, transact) => total + transact.amount, 0);
+      let totalIncome = 0;
+      let totalExpense = 0;
+      transactions.forEach(transaction => {
+        if (transaction.type === 'Income') {
+          totalIncome += transaction.amount;
+        } else {
+          totalExpense += transaction.amount;
+        }
+      });
+      const totalBalance = totalIncome - totalExpense;
+      balance.textContent = formatter.format(Math.abs(totalBalance));
+      income.textContent = formatter.format(totalIncome);
+      expense.textContent = formatter.format(totalExpense);
 
-      const expenseTotal = transactions
-        .filter((transact) => transact.type === "expense")
-        .reduce((total, transact) => total + transact.amount, 0);
-
-      const balanceTotal = incomeTotal - expenseTotal;
-
-      // Update the UI
-      balance.textContent = formatter.format(balanceTotal).substring(1);  
-      balance.style.color = balanceTotal >= 0 ? "white" : "#D21404"; 
-
-      income.textContent = formatter.format(incomeTotal);
-      expense.textContent = formatter.format(expenseTotal * -1);  
+      // Change the color of the balance text if negative
+      if (totalBalance < 0) {
+        balance.classList.add('negative');
+      } else {
+        balance.classList.remove('negative');
+      }
     });
 }
 
 // Render transaction list
 function renderList() {
-  list.innerHTML = "";
+  const tableBody = document.querySelector('.content-header tbody');
+  tableBody.innerHTML = "";
   
   fetch('/api/transactions')
     .then(response => response.json())
     .then(transactions => {
-      if (transactions.length === 0) {
-        status.textContent = "No transactions.";
-        return;
-      }
-
-      transactions.forEach(({ id, name, amount, date, type }) => {
-        const sign = type === "income" ? 1 : -1;
-
-        const li = document.createElement("li");
-
-        li.innerHTML = `
-          <div class="name">
-            <h4>${name}</h4>
-            <p>${new Date(date).toLocaleDateString()}</p>
-          </div>
-          
-          <div class="amount ${type}">
-            <span>${formatter.format(amount * sign)}</span>
-          </div>
-        
-          <div class="action">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" onclick="deleteTransaction(${id})">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+      transactions.forEach(transaction => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${transaction.id}</td>
+          <td>${transaction.type}</td>
+          <td>${transaction.name}</td>
+          <td>${formatter.format(transaction.amount)}</td>
+          <td>${dateFormat(transaction.date)}</td>
+          <td>
+            <button class="btn btn-view" onclick='viewTransaction(${JSON.stringify(transaction)})'>View</button>
+            <button class="btn btn-update" onclick='showUpdateModal(${JSON.stringify(transaction)})'>Update</button>
+            <button class="btn btn-delete" onclick='deleteTransaction(${transaction.id})'>Delete</button>
+          </td>
         `;
-        
-        list.appendChild(li);
+        tableBody.appendChild(tr);
       });
-
       updateTotal();
     });
 }
@@ -81,51 +73,131 @@ function renderList() {
 // Delete a transaction
 function deleteTransaction(id) {
   fetch(`/api/transactions/${id}`, {
-    method: 'DELETE',
+    method: 'DELETE'
   })
- 
-    .then(response => {
-      if (response.ok) {
-        updateTotal();
-        renderList();
-      } else {
-        status.textContent = "Failed to delete transaction.";
-      }
-    })
-    .catch(error => console.error('Error:', error));
+  .then(response => response.json())
+  .then(data => {
+    renderList();
+  })
+  .catch(error => console.error('Error:', error));
 }
 
 // Add a new transaction
 function addTransaction(e) {
   e.preventDefault();
-
-  const formData = new FormData(this);
-  
+  const formData = new FormData(form);
   const newTransaction = {
+    type: formData.get("type") ? "Income" : "Expense",
     name: formData.get("name"),
     amount: parseFloat(formData.get("amount")),
-    date: formData.get("date"),
-    type: formData.get("type") === "on" ? "income" : "expense",
+    date: formData.get("date")
   };
 
-  // Send the transaction to the server
   fetch('/api/transactions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newTransaction),
   })
-    .then(response => response.json())
-    .then(data => {
-      if (data.message === 'Transaction added successfully') {
-        renderList(); 
-      } else {
-        status.textContent = "Failed to add transaction.";
-      }
+  .then(response => response.json())
+  .then(data => {
+    form.reset();
+    renderList();
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function viewTransaction(transaction) {
+    const modal = document.getElementById("viewModal");
+    const viewDetails = document.getElementById("viewDetails");
+    viewDetails.innerHTML = `
+        <p>ID: ${transaction.id}</p>
+        <p>Type: ${transaction.type}</p>
+        <p>Name: ${transaction.name}</p>
+        <p>Amount: ${formatter.format(transaction.amount)}</p>
+        <p>Date: ${dateFormat(transaction.date)}</p>
+    `;
+    modal.style.display = "block";
+}
+
+function showUpdateModal(transaction) {
+  const modal = document.getElementById("updateModal");
+  document.getElementById("updateId").value = transaction.id;
+  document.getElementById("updateName").value = transaction.name;
+  document.getElementById("updateAmount").value = transaction.amount;
+  document.getElementById("updateDate").value = transaction.date;
+
+  if (transaction.type === 'Income') {
+      document.getElementById("updateTypeIncome").checked = true;
+  } else {
+      document.getElementById("updateTypeExpense").checked = true;
+  }
+
+  modal.style.display = "block";
+}
+
+function showUpdateModal(transaction) {
+  const modal = document.getElementById("updateModal");
+  document.getElementById("updateId").value = transaction.id;
+  document.getElementById("updateName").value = transaction.name;
+  document.getElementById("updateAmount").value = transaction.amount;
+  document.getElementById("updateDate").value = transaction.date;
+
+  modal.style.display = "block";
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = "none";
+}
+
+function updateTransaction(event) {
+    event.preventDefault();
+    const form = document.getElementById("updateForm");
+    const formData = new FormData(form);
+    const updatedTransaction = {
+        id: formData.get("id"),
+        name: formData.get("name"),
+        amount: parseFloat(formData.get("amount")),
+        date: formData.get("date")
+    };
+
+    fetch(`/update/${updatedTransaction.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTransaction),
+    })
+    .then(response => {
+        if (response.ok) {
+            closeModal('updateModal');
+            renderList();
+        } else {
+            console.error('Failed to update transaction');
+        }
     })
     .catch(error => console.error('Error:', error));
 }
 
+// Format date to MM/DD/YYYY
+function dateFormat(dateString) {
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+}
+
+// Close the modal when the user clicks outside of it
+window.onclick = function(event) {
+    const viewModal = document.getElementById("viewModal");
+    const updateModal = document.getElementById("updateModal");
+    if (event.target == viewModal) {
+        viewModal.style.display = "none";
+    }
+    if (event.target == updateModal) {
+        updateModal.style.display = "none";
+    }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderList(); 
+    renderList(); 
 });
