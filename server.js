@@ -1,11 +1,12 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -15,7 +16,7 @@ app.use(express.json());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', // Replace with your MySQL username
-    password: '123', // Replace with your MySQL password
+    password: 'password', // Replace with your MySQL password
     database: 'DATABASE_PROJECT',
 });
 
@@ -29,6 +30,7 @@ db.connect(err => {
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); 
 
 // Routes
 app.get('/', (req, res) => {
@@ -72,19 +74,20 @@ app.post('/api/transactions', (req, res) => {
 
 
 // Update transaction
-app.post('/update/:id', (req, res) => {
-    const { id } = req.params;
-    const { type, name, amount, date } = req.body;
-    const query = 'UPDATE transactions SET type = ?, name = ?, amount = ?, date = ? WHERE id = ?';
-    db.query(query, [type, name, amount, date, id], (err) => {
-        if (err) {
-            console.error('Error updating record:', err.message);
-            res.sendStatus(500);
-        } else {
-            res.redirect('/');
-        }
-    });
+app.post('/update', (req, res) => {
+  const { id, type, name, amount, date } = req.body;
+  if (!type) {
+      return res.status(400).json({ error: 'Type cannot be null' });
+  }
+  const query = 'UPDATE transactions SET type = ?, name = ?, amount = ?, date = ? WHERE id = ?';
+  db.query(query, [type, name, amount, date, id], (err, result) => {
+      if (err) {
+          return res.status(500).json({ error: 'Database error' });
+      }
+      res.json({ success: true });
+  });
 });
+
 
 // Delete transaction
 app.delete('/api/transactions/:id', (req, res) => {
