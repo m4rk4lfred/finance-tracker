@@ -13,22 +13,22 @@
         <header>
             <div>
                 <h5>TOTAL BALANCE</h5>
-                <span id="balance"> Php 0.00</span>
+                <span id="balance"> ₱ 0.00</span>
             </div>
 
             <div>
                 <h5>Income</h5>
-                <span id="income">$0.00</span>
+                <span id="income">₱ 0.00</span>
             </div>
 
             <div>
                 <h5>Expense</h5>
-                <span id="expense">$0.00</span>
+                <span id="expense">₱ 0.00</span>
             </div>
         </header>
 
         <section>
-            <h3>Transactions</h3>
+            <h3>Recent Transactions</h3>
             <ul id="transactionList"></ul>
             <div id="status"></div>
         </section>
@@ -37,19 +37,22 @@
             <h3>Add Transactions</h3>
             <form id="transactionForm" action="/add" method="POST">
                 <div>
-                    <label for="type">
-                        <input type="checkbox" name="type" id="type" />
+                    <label for="typeCheckbox">
+                        <input type="checkbox" name="type" id="typeCheckbox" />
                         <div class="option">
-                          <span>Expense</span>
-                          <span>Income</span>
+                            <span>Income</span>
+                            <span>Expense</span>
                         </div>
                     </label>
                 </div>
-
+                
                 <div>
                     <label for="name">Name</label>
-                    <input type="text" name="name" placeholder="Name" required>
+                    <select name="name" id="name" required>
+                        <!-- Options will be added here dynamically -->
+                    </select>
                 </div>
+                
 
                 <div>
                     <label for="amount">Amount</label>
@@ -67,78 +70,140 @@
     </main>
 
     <h2>Financial History</h2>
-    <table class="content-header" border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% function dateFormat(dateString) { 
-                const date = new Date(dateString); 
-                const month = String(date.getMonth() + 1).padStart(2, '0'); 
-                const day = String(date.getDate()).padStart(2, '0'); 
-                const year = date.getFullYear(); 
-                return `${month}/${day}/${year}`; 
-            } %>
-            <% transactions.forEach(transaction => { %>
-            <tr>
-                <td><%= transaction.id %></td>
-                <td><%= transaction.type %></td>
-                <td><%= transaction.name %></td>
-                <td><%= transaction.amount %></td>
-                <td><%= dateFormat(transaction.date) %></td>
-                <td>
-                    <button class="btn btn-view" onclick="viewTransaction(<%= JSON.stringify(transaction) %>)">View</button>
-                    <button class="btn btn-update" onclick="showUpdateModal(<%= JSON.stringify(transaction) %>)">Update</button>
-                    <button class="btn btn-delete" onclick="deleteTransaction(<%= transaction.id %>)">Delete</button>
-                </td>
-            </tr>
-            <% }); %>
-        </tbody>
-    </table>
+    <div class="scrollable-table">
+        <table class="content-header" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% function dateFormat(dateString) { 
+                    if (!dateString) return 'Invalid Date'; 
+                    const date = new Date(dateString); 
+                    if (isNaN(date)) return 'Invalid Date';
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+                    const day = String(date.getDate()).padStart(2, '0'); 
+                    const year = date.getFullYear(); 
+                    return `${month}/${day}/${year}`; 
+                } %>
+                <% transactions.forEach(transaction => { %>
+                <tr>
+                    <td><%= transaction.id || 'N/A' %></td>
+                    <td><%= transaction.type || 'Unknown' %></td>
+                    <td><%= transaction.name || 'No Name' %></td>
+                    <td><%= transaction.amount || '0.00' %></td>
+                    <td><%= dateFormat(transaction.date) %></td>
+                    <td>
+                        <button class="btn-view" onclick="viewTransaction(<%= JSON.stringify(transaction) %>)">View</button>
+                        <button class="btn-update" onclick="showUpdateModal(<%= JSON.stringify(transaction) %>)">Update</button>
+                        <button class="btn-delete" onclick="deleteTransaction(<%= transaction.id %>)">Delete</button>
 
-    <!-- View Modal Structure -->
-  <!-- View Modal Structure -->
-  <div id="viewModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="close" onclick="closeModal('viewModal')">&times;</span>
-            <h2 id="viewHeader">View Record Information</h2>
-        </div>
-        <p id="viewDetails"></p>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
     </div>
-</div>
+   
 
+<!-- View Modal Structure -->
+<div id="viewModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="viewHeader">View Record Information</h2>
+        <span class="close" onclick="closeModal('viewModal')">&times;</span>
+      </div>
+      <p id="viewDetails"></p>
+    </div>
+  </div>
+  
 <div id="updateModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <span class="close" onclick="closeModal('updateModal')">&times;</span>
-            <h2 id="updateHeader">Update Transaction</h2>
+    <div class="modal-header">
+        <h2>Update Transaction</h2>
+        <span class="close" onclick="closeModal('updateModal')">&times;</span>
+    </div>
+    <form id="updateForm" onsubmit="updateTransaction(event)">
+        <input type="hidden" name="id" id="updateId">
+        <div>
+        <label for="updateType">Type</label>
+        <select name="type" id="updateType" required onchange="updateModalNameOptions()">
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+        </select>
         </div>
-        <form id="updateForm" onsubmit="updateTransaction(event)">
-            <input type="hidden" name="id" id="updateId">
-            <div>
-                <label for="updateName">Name</label>
-                <input type="text" name="name" id="updateName" required>
-            </div>
-            <div>
-                <label for="updateAmount">Amount</label>
-                <input type="number" name="amount" id="updateAmount" required>
-            </div>
-            <div>
-                <label for="updateDate">Date</label>
-                <input type="date" name="date" id="updateDate" required>
-            </div>
-            <button type="submit">Update</button>
-        </form>
+        <div>
+            <label for="updateName">Name</label>
+            <select name="name" id="updateName" required></select>
+        </div>
+        <div>
+            <label for="updateAmount">Amount</label>
+            <input type="number" name="amount" id="updateAmount" required>
+        </div>
+        <div>
+            <label for="updateDate">Date</label>
+            <input type="date" name="date" id="updateDate" required>
+        </div>
+        <button type="submit">Update</button>
+    </form>
     </div>
 </div>
+
+    <!-- Confirmation Modal Structure -->
+        <div id="confirmModal" class="confirmationModal">
+            <div class="confirmationModal-content">
+                <div class="modal-header">
+                    <h2>Confirmation Message</h2>
+                </div>
+                <p>Are you sure you want to delete this transaction?</p>
+                <div class="confirmationModal-actions">
+                    <button id="confirmYes" class="btn">Yes</button>
+                    <button id="confirmNo" class="btn">No</button>
+                </div>
+            </div>
+        </div>
+
+  
     <script src="/script.js"></script>
+
+        <script>
+            function updateNameOptions() {
+                const isChecked = document.getElementById('typeCheckbox').checked; // true if checked, false if unchecked
+                const nameDropdown = document.getElementById('name');
+                nameDropdown.innerHTML = ''; // Clear current options
+                
+                let options = [];
+                if (isChecked) {
+                    // If checked, it's "Expense"
+                    options = ['Rent', 'Groceries', 'Utilities', 'Transportation', 'Insurance', 'Healthcare', 'Entertainment', 'Education', 'Home Maintenance', 'Others'];
+                } else {
+                    // If unchecked, it's "Income"
+                    options = ['Salary', 'Freelance', 'Business Income', 'Commissions', 'Interest', 'Rental Income', 'Pensions', 'Bonus', 'Others'];
+                }
+
+                options.forEach(option => {
+                    const optElement = document.createElement('option');
+                    optElement.value = option;
+                    optElement.textContent = option;
+                    nameDropdown.appendChild(optElement);
+                });
+
+                
+            }
+
+            // Initialize the Name dropdown based on the initial state of the checkbox
+            updateNameOptions();
+
+            // Add event listener to update the dropdown when checkbox is toggled
+            document.getElementById('typeCheckbox').addEventListener('change', updateNameOptions);
+
+
+    </script>
 </body>
 </html>
