@@ -180,8 +180,6 @@ label[for="name"] {
 }
 
 
-
-
 ul {
   list-style-type: none;
 }
@@ -255,6 +253,31 @@ ul li:hover .action {
   margin-bottom: 0.5rem;
 }
 
+/* SEARCH SECTION */
+#searchForm{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto ;
+  padding-bottom: 2%;
+  width: 100%;
+}
+
+#searchBar{
+  width: 50%; 
+    max-width: 600px; 
+    min-width: 200px; 
+    margin-bottom: 1rem; 
+}
+
+#category {
+    width: 20%; 
+    height: 10%;
+    max-width: 600px;
+    min-width: 200px;
+    font-size: 1.1em;
+}
+
 /* TABLE SECTION */
 h2 {
   margin-top: 3rem;
@@ -277,9 +300,9 @@ h2 {
 
 .content-header {
   margin: 0 auto;
-  border-collapse: collapse; /* Proper table layout */
+  border-collapse: collapse; 
   border: none;
-  width: 100%; /* Table width adjusts dynamically */
+  width: 100%;
 }
 
 .content-header th {
@@ -297,15 +320,15 @@ h2 {
   border: none;
   padding: 0.5em;
   text-align: left;
-  white-space: nowrap; /* Prevent wrapping; adjust for long content */
+  white-space: nowrap; 
 }
 
 .content-header td {
-  height: auto; /* Allow height to adjust to content */
+  height: auto; /
 }
 
 .content-header tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3; /* Alternating row colors */
+  background-color: #f3f3f3; 
 }
 
 .content-header tr {
@@ -477,26 +500,122 @@ h2 {
   opacity: 0.8;
 }
 
-#searchForm{
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+/* Transaction Form */
+header {
+  background: var(--main-color);
+  color: #fff;
+  padding: 1rem;
+  text-align: center; /* Center the text horizontally */
+  border-radius: 10px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0 auto ;
-  padding-bottom: 2%;
-  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the content horizontally within the header */
 }
 
-#searchBar{
-  width: 50%; 
-    max-width: 600px; 
-    min-width: 200px; 
-    margin-bottom: 1rem; 
+header div {
+  padding: 5px;
+  font-size: 0.8rem; /* Smaller font size */
 }
 
-#category {
-    width: 20%; 
-    height: 10%;
-    max-width: 600px;
-    min-width: 200px;
-    font-size: 1.1em;
+header div:first-child {
+  flex-basis: 100%; /* Make the first div full width */
+  font-size: 1.25rem; /* Adjust size for the first item */
 }
+
+header div:nth-child(n + 2) {
+  flex-basis: 33%; /* Each div takes 33% width */
+}
+
+h5 {
+  margin: 0;
+  font-size: 0.8rem; /* Smaller font size for the headers */
+}
+
+span {
+  font-size: 1rem; /* Smaller font size for the amount values */
+}
+
+
+  /* Scrollable Table */
+  .scrollable-table {
+    max-width: 100%;
+    margin: 0 auto;
+    overflow-x: auto; /* Allow horizontal scrolling if content overflows */
+    border: 1px solid #ddd;
+  }
+
+  /* Table header and cells alignment */
+  .content-header th,
+  .content-header td {
+    font-size: 0.85rem;
+    padding: 0.4em;
+    text-align: left; /* Ensure all text aligns left */
+    white-space: nowrap; /* Prevent text from wrapping for headers and values */
+  }
+
+  /* Adjust header styling */
+  .content-header th {                                            
+        display: none !important; 
+      }
+  /* Adjust list item styles for mobile */
+  ul li {
+    flex-wrap: wrap;
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  ul li .name h4 {
+    font-size: 0.95rem;
+  }
+
+  ul li .name p {
+    font-size: 0.75rem;
+  }
+
+  ul li .amount {
+    font-size: 0.9rem;
+  }
+
+  /* Modal */
+  .modal-content {
+    width: 90%; /* Reduce modal width on small screens */
+    padding: 1rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1rem;
+  }
+
+  /* Responsive adjustments for buttons in the table */
+  .content-header td {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: flex-start; /* Align buttons to the left */
+    justify-content: flex-start; /* Ensure vertical alignment at the top */
+    gap: 8px; /* Add spacing between buttons */
+  }
+
+  .btn {
+    font-size: 0.8rem; /* Reduce font size for mobile */
+    padding: 8px 12px; /* Smaller padding */
+    width: 100%; /* Full-width buttons */
+    text-align: left; /* Ensure buttons text is aligned to the left */
+  }
+
+
+  .btn-view {
+    background: linear-gradient(45deg, #1e90ff, #00bfff);
+  }
+
+  .btn-update {
+    background: linear-gradient(45deg, #32cd32, #7cfc00);
+  }
+
+  .btn-delete {
+    background: linear-gradient(45deg, #ff4500, #ff6347);
+  }
+}
+
+
