@@ -53,7 +53,7 @@
                 
                 <div>
                     <label for="amount">Amount</label>
-                    <input type="number" name="amount" value="0" min="0.01" step="0.01" required />
+                    <input type="number" name="amount" value="0" min="1" step="0.01" required />
                 </div>
 
                 <div>
@@ -101,9 +101,9 @@
                     <td><%= transaction.amount || '0.00' %></td>
                     <td><%= new Date(transaction.date).toLocaleDateString() || 'Invalid Date' %></td>
                     <td>
-                        <button class="btn-view" onclick="viewTransaction(<%= JSON.stringify(transaction) %>)">View</button>
-                        <button class="btn-update" onclick="showUpdateModal(<%= JSON.stringify(transaction) %>)">Update</button>
-                        <button class="btn-delete" onclick="deleteTransaction(<%= transaction.id %>)">Delete</button>
+                        <button class="btn-view" onclick="viewTransaction('<%= JSON.stringify(transaction) %>')">View</button>
+                        <button class="btn-update" onclick="showUpdateModal('<%= JSON.stringify(transaction) %>')">Update</button>
+                        <button class="btn-delete" onclick="deleteTransaction('<%= transaction.id %>')">Delete</button>
                     </td>
                 </tr>
                 <% }); %>
@@ -111,7 +111,7 @@
         </table>
     </div>
 
-    <!-- Modals and Scripts -->
+     <!-- View Modal Script -->
     <div id="viewModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -122,6 +122,7 @@
         </div>
     </div>
   
+    <!-- Update Modal Script -->
     <div id="updateModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -143,11 +144,11 @@
                 </div>
                 <div>
                     <label for="updateAmount">Amount</label>
-                    <input type="number" name="amount" id="updateAmount" required>
+                    <input type="number" name="amount" id="updateAmount" value="0" min="1" step="0.01"required>
                 </div>
                 <div>
                     <label for="updateDate">Date</label>
-                    <input type="date" name="date" id="updateDate" required>
+                    <input type="date" id="updateDate" name="updateDate" / required>
                 </div>
                 <button type="submit">Update</button>
             </form>
